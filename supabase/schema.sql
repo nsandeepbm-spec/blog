@@ -17,15 +17,13 @@ END $$;
 -- 2. CORE TABLES
 -- ========================
 
--- ==========================================
--- Table: users (ALREADY CREATED BY YOU)
--- ==========================================
--- CREATE TABLE IF NOT EXISTS public.users (
---   id UUID REFERENCES auth.users(id) PRIMARY KEY,
---   email TEXT NOT NULL,
---   role VARCHAR CHECK (role IN ('admin', 'user')) DEFAULT 'user',
---   created_at TIMESTAMPTZ DEFAULT NOW()
--- );
+-- Table: users
+CREATE TABLE IF NOT EXISTS public.users (
+  id UUID REFERENCES auth.users(id) PRIMARY KEY,
+  email TEXT NOT NULL,
+  role VARCHAR CHECK (role IN ('admin', 'user')) DEFAULT 'user',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
 
 -- Table: categories
 CREATE TABLE IF NOT EXISTS public.categories (
@@ -36,7 +34,6 @@ CREATE TABLE IF NOT EXISTS public.categories (
 );
 
 -- Table: articles
--- (Must be created after categories due to the foreign key: category_id)
 CREATE TABLE IF NOT EXISTS public.articles (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     category_id     UUID NOT NULL REFERENCES public.categories(id) ON DELETE RESTRICT,
@@ -54,27 +51,39 @@ CREATE TABLE IF NOT EXISTS public.articles (
 
 
 -- ========================
--- 3. TRIGGERS & FUNCTIONS
+-- 3. HELPER FUNCTIONS
 -- ========================
 
--- ==========================================
--- Trigger: auth.users -> public.users (ALREADY CREATED BY YOU)
--- ==========================================
--- CREATE OR REPLACE FUNCTION public.handle_new_user()
--- RETURNS trigger AS $$
--- BEGIN
---   INSERT INTO public.users (id, email, role)
---   VALUES (new.id, new.email, 'user');
---   RETURN new;
--- END;
--- $$ LANGUAGE plpgsql SECURITY DEFINER;
+-- Safe admin check function (SECURITY DEFINER bypasses RLS to prevent infinite recursion)
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS boolean AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.users
+    WHERE id = auth.uid() AND role = 'admin'
+  );
+$$ LANGUAGE sql SECURITY DEFINER;
 
--- DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
--- CREATE TRIGGER on_auth_user_created
---   AFTER INSERT ON auth.users
---   FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
 
--- Trigger: Automatically update 'updated_at' on articles
+-- ========================
+-- 4. TRIGGERS & FUNCTIONS
+-- ========================
+
+-- Trigger: Sync new auth users to public.users
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger AS $$
+BEGIN
+  INSERT INTO public.users (id, email, role)
+  VALUES (new.id, new.email, 'user');
+  RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
+
+-- Trigger: Auto-update articles.updated_at
 CREATE OR REPLACE FUNCTION public.handle_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -89,7 +98,7 @@ CREATE TRIGGER on_articles_updated
     FOR EACH ROW
     EXECUTE FUNCTION public.handle_updated_at();
 
--- Trigger: Automatically set 'published_at' on articles when status changes to PUBLISHED
+-- Trigger: Auto-set articles.published_at when status → PUBLISHED
 CREATE OR REPLACE FUNCTION public.handle_published_at()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -108,7 +117,7 @@ CREATE TRIGGER on_article_published
 
 
 -- ========================
--- 4. ROW LEVEL SECURITY (RLS)
+-- 5. ROW LEVEL SECURITY (RLS)
 -- ========================
 
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
@@ -116,15 +125,14 @@ ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.articles ENABLE ROW LEVEL SECURITY;
 
 -- Users Policies
-CREATE POLICY "Users view own data" ON public.users FOR SELECT USING (auth.uid() = id);
-CREATE POLICY "Admins view all users" ON public.users FOR SELECT USING (EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role = 'admin'));
-CREATE POLICY "Admins update user roles" ON public.users FOR UPDATE USING (EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role = 'admin'));
+CREATE POLICY "Users view own data"       ON public.users FOR SELECT USING (auth.uid() = id);
+CREATE POLICY "Admins view all users"     ON public.users FOR SELECT USING (public.is_admin());
+CREATE POLICY "Admins update user roles"  ON public.users FOR UPDATE USING (public.is_admin());
 
 -- Categories Policies
-CREATE POLICY "Public read categories" ON public.categories FOR SELECT USING (true);
-CREATE POLICY "Admins manage categories" ON public.categories FOR ALL TO authenticated USING (EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role = 'admin'));
+CREATE POLICY "Public read categories"  ON public.categories FOR SELECT USING (true);
+CREATE POLICY "Admins manage categories" ON public.categories FOR ALL TO authenticated USING (public.is_admin());
 
 -- Articles Policies
-CREATE POLICY "Public can view published articles" ON public.articles FOR SELECT USING (status = 'PUBLISHED');
-CREATE POLICY "Admins manage articles" ON public.articles FOR ALL TO authenticated USING (EXISTS (SELECT 1 FROM public.users WHERE id = auth.uid() AND role = 'admin'));
-
+CREATE POLICY "Public view published articles" ON public.articles FOR SELECT USING (status = 'PUBLISHED');
+CREATE POLICY "Admins manage articles"         ON public.articles FOR ALL TO authenticated USING (public.is_admin());

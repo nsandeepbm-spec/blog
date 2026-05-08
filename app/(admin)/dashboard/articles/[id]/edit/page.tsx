@@ -9,13 +9,13 @@ export default async function EditArticlePage({ params }: { params: Promise<{ id
   const supabase = await createClient()
 
   const [categoriesRes, articleRes] = await Promise.all([
-    supabase.from('categories').select('id, name_en'),
+    supabase.from('categories').select('id, name'),
     supabase.from('articles').select('*').eq('id', id).single(),
   ])
 
   if (articleRes.error || !articleRes.data) notFound()
 
-  const categories = (categoriesRes.data ?? []) as Pick<Category, 'id' | 'name_en'>[]
+  const categories = (categoriesRes.data ?? []) as Pick<Category, 'id' | 'name'>[]
   const article = articleRes.data as Article
 
   return (

@@ -95,7 +95,7 @@ export default function CategoryClient({ initialCategories }: { initialCategorie
               type="text" 
               value={formData.slug} 
               onChange={e => setFormData({...formData, slug: e.target.value})}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+              className="text-gray-700 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
               placeholder="e.g. electric-vehicles"
             />
           </div>
@@ -106,7 +106,7 @@ export default function CategoryClient({ initialCategories }: { initialCategorie
               type="text" 
               value={formData.name} 
               onChange={e => setFormData({...formData, name: e.target.value})}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+              className="text-gray-700 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
               placeholder="e.g. Electric Vehicles"
             />
           </div>
