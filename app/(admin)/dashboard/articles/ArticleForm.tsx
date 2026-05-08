@@ -181,9 +181,11 @@ function RichEditor({
 export default function ArticleForm({
   initialData,
   categories,
+  authorName = 'Admin',
 }: {
   initialData?: any
   categories: Category[]
+  authorName?: string
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -217,7 +219,7 @@ export default function ArticleForm({
           await createArticle({
             ...formData,
             is_ai_generated: false,
-            author_name: 'Admin',
+            author_name: authorName,
           })
         }
         router.push('/dashboard/articles')

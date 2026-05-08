@@ -11,6 +11,7 @@ const navLinks = [
   { name: "SPORT", href: "/sport" },
   { name: "GOVERNMENT", href: "/government" },
   { name: "HEALTH", href: "/health" },
+  { name: "MARKETS", href: "/stock-market" },
 ];
 
 // Page-specific ticker configuration
@@ -50,6 +51,12 @@ const tickerConfig: Record<string, { label: string; text: string; stat: string; 
     text: "Latest breakthroughs in genomics, neuroscience, clinical trials, nutrition, and longevity research.",
     stat: "CLINICAL",
     statLabel: "UPDATES",
+  },
+  "/stock-market": {
+    label: "MARKETS LIVE",
+    text: "Real-time coverage of global equities, commodities, crypto, IPOs, and macro economic shifts.",
+    stat: "LIVE",
+    statLabel: "INDICES",
   },
 };
 
@@ -106,34 +113,33 @@ const Navbar = () => {
       </nav>
 
       {/* ── SMART TICKER BAR ── */}
-      <div className="bg-[#050a14] text-white border-t border-slate-800">
-        <div className="max-w-[1440px] mx-auto px-6 py-2 flex items-center justify-between gap-6">
+      <div className="bg-slate-900 border-t border-slate-800">
+        <div className="max-w-[1440px] mx-auto px-6 py-2.5 flex items-center gap-6">
 
-          {/* Left: Status pill + page-specific text */}
-          <div className="flex items-center gap-4 min-w-0 overflow-hidden">
-
-            {/* Pulsing live indicator */}
-            <div className="flex items-center gap-2 bg-blue-500/10 border border-blue-500/30 px-3 py-1 rounded-full shrink-0">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-blue-500"></span>
-              </span>
-              <span className="text-[9px] font-black tracking-widest text-blue-400 uppercase whitespace-nowrap">
-                {ticker.label}
-              </span>
-            </div>
-
-            {/* Page-specific ticker text */}
-            <p className="text-[10px] text-slate-400 font-medium tracking-tight truncate hidden sm:block">
-              {ticker.text}
-            </p>
+          {/* Live pill */}
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-blue-500" />
+            </span>
+            <span className="text-[10px] font-black tracking-[0.2em] text-white uppercase whitespace-nowrap">
+              {ticker.label}
+            </span>
           </div>
 
-          {/* Right: Page-specific stat */}
-          <div className="hidden md:flex items-center gap-2 border-l border-slate-800 pl-6 shrink-0">
-            <div className="text-right">
-              <p className="text-[8px] text-slate-500 uppercase font-black tracking-widest">{ticker.statLabel}</p>
-              <p className="text-blue-400 font-black text-[13px] leading-none mt-0.5">{ticker.stat}</p>
+          {/* Divider */}
+          <div className="w-px h-4 bg-slate-700 shrink-0 hidden md:block" />
+
+          {/* Short ticker text */}
+          <p className="text-[12px] text-white font-medium tracking-wide truncate flex-1 hidden sm:block">
+            {ticker.text}
+          </p>
+
+          {/* Right stat */}
+          <div className="hidden md:flex items-center gap-2 shrink-0 ml-auto">
+            <div className="bg-slate-800 border border-slate-700 shadow-sm rounded-lg px-3 py-1 flex items-center gap-2">
+              <span className="text-[9px] text-slate-300 uppercase font-bold tracking-widest">{ticker.statLabel}</span>
+              <span className="text-white font-black text-[12px]">{ticker.stat}</span>
             </div>
           </div>
 

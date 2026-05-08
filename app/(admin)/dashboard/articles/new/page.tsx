@@ -7,20 +7,32 @@ import ArticleForm from '../ArticleForm'
 export default async function NewArticlePage() {
   const supabase = await createClient()
 
-  const { data, error } = await supabase
-    .from('categories')
-    .select('id, name')
-    .order('name', { ascending: true })
+  // Fetch categories + current logged-in user's display name in parallel
+  const [catRes, { data: { user } }] = await Promise.all([
+    supabase.from('categories').select('id, name').order('name', { ascending: true }),
+    supabase.auth.getUser(),
+  ])
 
-  if (error) {
+  // Fetch display_name from users table
+  let authorName = 'Admin'
+  if (user?.id) {
+    const { data: profile } = await supabase
+      .from('users')
+      .select('display_name, email')
+      .eq('id', user.id)
+      .single()
+    authorName = profile?.display_name || profile?.email?.split('@')[0] || user.email?.split('@')[0] || 'Admin'
+  }
+
+  if (catRes.error) {
     return (
       <div className="p-6 bg-red-50 border border-red-200 rounded-2xl text-red-700 text-sm">
-        ⚠️ Could not load categories: {error.message}
+        ⚠️ Could not load categories: {catRes.error.message}
       </div>
     )
   }
 
-  const categories = (data ?? []) as Pick<Category, 'id' | 'name'>[]
+  const categories = (catRes.data ?? []) as Pick<Category, 'id' | 'name'>[]
 
   if (categories.length === 0) {
     return (
@@ -48,11 +60,13 @@ export default async function NewArticlePage() {
         </div>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Create New Article</h1>
-          <p className="text-sm text-gray-500">Write and publish a new article to Blorix.</p>
+          <p className="text-sm text-gray-500">
+            Writing as <span className="font-semibold text-gray-700">{authorName}</span>
+          </p>
         </div>
       </div>
 
-      <ArticleForm categories={categories} />
+      <ArticleForm categories={categories} authorName={authorName} />
     </div>
   )
 }

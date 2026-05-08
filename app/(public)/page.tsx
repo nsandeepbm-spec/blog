@@ -50,7 +50,13 @@ export default async function GlobalHomePage() {
     .order('published_at', { ascending: false })
     .limit(20);
 
-  const articles = rawArticles || [];
+  // Normalize the data mapping for categories join
+  const articles = (rawArticles || []).map(article => ({
+    ...article,
+    categories: Array.isArray(article.categories) 
+      ? article.categories[0] 
+      : (article.categories || null)
+  }));
   
   // Separate into featured and others
   const featuredArticle = articles.length > 0 ? articles[0] : null;
@@ -63,10 +69,14 @@ export default async function GlobalHomePage() {
   const sportArticles = articles.filter(a => a.categories?.slug === 'sport').slice(0, 3);
   const govArticles = articles.filter(a => a.categories?.slug === 'industry-news' || a.categories?.slug === 'government').slice(0, 3);
   const healthArticles = articles.filter(a => a.categories?.slug === 'health').slice(0, 3);
+  const stockArticles = articles.filter(a => a.categories?.slug === 'stock-market' || a.categories?.slug?.includes('market') || a.categories?.slug?.includes('finance')).slice(0, 3);
+
+  // Helper: strip HTML tags for plain-text previews
+  const stripHtml = (html: string) => html.replace(/<[^>]*>/g, '').replace(/&[a-z]+;/gi, ' ').trim();
 
   return (
     <div className="bg-white font-sans text-slate-900">
-      <main className="max-w-[1440px] mx-auto px-6 py-10 mt-28">
+      <main className="max-w-[1440px] mx-auto px-6 py-10 pt-40">
         
         {/* 1. HERO SECTION GRID */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 pb-16 border-b border-gray-100">
@@ -89,7 +99,7 @@ export default async function GlobalHomePage() {
                   {featuredArticle.title}
                 </h1>
                 <p className="text-[18px] text-gray-500 leading-relaxed max-w-2xl mb-8 line-clamp-3">
-                  {featuredArticle.body.replace(/[#*`]/g, '')}
+                  {stripHtml(featuredArticle.body).substring(0, 220)}
                 </p>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold uppercase">
@@ -216,7 +226,7 @@ export default async function GlobalHomePage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             {automobileArticles.length > 0 ? automobileArticles.map(a => (
-              <ArticleCard key={a.id} category={a.categories?.name || 'AUTO'} title={a.title} desc={a.body.substring(0, 100) + '...'} imageUrl={a.image_url || 'https://images.pexels.com/photos/3802510/pexels-photo-3802510.jpeg?auto=compress&cs=tinysrgb&w=800'} slug={a.slug} />
+              <ArticleCard key={a.id} category={a.categories?.name || 'AUTO'} title={a.title} desc={stripHtml(a.body).substring(0, 120) + '...'} imageUrl={a.image_url || 'https://images.pexels.com/photos/3802510/pexels-photo-3802510.jpeg?auto=compress&cs=tinysrgb&w=800'} slug={a.slug} />
             )) : (
               <>
                 <ArticleCard category="REVIEW" title="Tesla Model S Plaid: Three Years Later." desc="Has the competition finally caught up to the electric world's 'acceleration king'?" imageUrl="https://images.pexels.com/photos/3802510/pexels-photo-3802510.jpeg?auto=compress&cs=tinysrgb&w=800" slug="#" />
@@ -318,6 +328,32 @@ export default async function GlobalHomePage() {
             )}
           </div>
         </section>
+
+        {/* 7. STOCK MARKET SECTION */}
+        {stockArticles.length > 0 && (
+          <section className="mt-20 border-t border-gray-100 pt-16">
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-[28px] font-black tracking-tighter uppercase flex items-center gap-3">
+                <div className="w-4 h-4 bg-emerald-500 rounded-sm"></div> Markets
+              </h2>
+              <Link href="/stock-market" className="text-[10px] font-bold tracking-widest flex items-center gap-1 hover:text-emerald-600 uppercase transition-colors">
+                View All <ArrowRight className="w-3 h-3" />
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+              {stockArticles.map(a => (
+                <ArticleCard
+                  key={a.id}
+                  category={a.categories?.name || 'MARKETS'}
+                  title={a.title}
+                  desc={stripHtml(a.body).substring(0, 120) + '...'}
+                  imageUrl={a.image_url || 'https://images.pexels.com/photos/6801648/pexels-photo-6801648.jpeg?auto=compress&cs=tinysrgb&w=800'}
+                  slug={a.slug}
+                />
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* 7. THE BRIEFING - NEWSLETTER */}
         <section className="mt-24 bg-[#050a14] p-12 md:p-16 flex flex-col md:flex-row items-center justify-between text-white relative overflow-hidden rounded-2xl shadow-2xl">
