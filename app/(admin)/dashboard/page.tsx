@@ -1,76 +1,77 @@
-import { ArticlesService } from '@/services/db/articles.service'
-import { FileEdit, CheckCircle2, Clock } from 'lucide-react'
+import { createClient } from '@/lib/supabase/server'
+import { FileText, Users, FolderTree, TrendingUp, Clock, Eye } from 'lucide-react'
 
-export default async function DashboardPage() {
-  // Use the new clean Service Layer instead of raw DB calls in the UI!
-  const { pendingCount, publishedCount } = await ArticlesService.getDashboardMetrics()
-  const pendingArticles = await ArticlesService.getPendingArticles()
+export default async function DashboardOverview() {
+  const supabase = await createClient()
+
+  // Fetch counts in parallel
+  const [articlesCount, usersCount, categoriesCount] = await Promise.all([
+    supabase.from('articles').select('*', { count: 'exact', head: true }),
+    supabase.from('users').select('*', { count: 'exact', head: true }),
+    supabase.from('categories').select('*', { count: 'exact', head: true }),
+  ])
+
+  const stats = [
+    { name: 'Total Articles', value: articlesCount.count || 0, icon: FileText, color: 'text-blue-600', bg: 'bg-blue-100' },
+    { name: 'Active Users', value: usersCount.count || 0, icon: Users, color: 'text-purple-600', bg: 'bg-purple-100' },
+    { name: 'Categories', value: categoriesCount.count || 0, icon: FolderTree, color: 'text-green-600', bg: 'bg-green-100' },
+    { name: 'Page Views', value: '0', icon: Eye, color: 'text-amber-600', bg: 'bg-amber-100' },
+  ]
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-black tracking-tight uppercase">Overview</h1>
-        <p className="text-gray-500 mt-1 font-medium">Manage your autonomous newsroom and review AI drafts.</p>
+        <h1 className="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
+        <p className="text-gray-500">Welcome back to the Blorix administration panel.</p>
       </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-between">
-          <div className="flex justify-between items-start mb-4">
-            <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest">Pending Review</h3>
-            <Clock className="w-5 h-5 text-amber-500" />
-          </div>
-          <p className="text-5xl font-black text-amber-500">{pendingCount}</p>
-        </div>
-        
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-between">
-          <div className="flex justify-between items-start mb-4">
-            <h3 className="text-xs font-black text-gray-500 uppercase tracking-widest">Published</h3>
-            <CheckCircle2 className="w-5 h-5 text-blue-600" />
-          </div>
-          <p className="text-5xl font-black text-blue-600">{publishedCount}</p>
-        </div>
-        
-        <div className="bg-white p-6 rounded-xl border border-blue-600 shadow-sm flex flex-col justify-center bg-blue-50/50">
-          <h3 className="text-xs font-black text-blue-800 uppercase tracking-widest mb-3 text-center">Quick Action</h3>
-          <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black tracking-widest uppercase text-xs py-3 px-4 rounded-md transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2">
-            <FileEdit className="w-4 h-4" />
-            Write Manual Article
-          </button>
-        </div>
-      </div>
-      
-      {/* Pending Articles List */}
-      <div className="mt-12 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-5 border-b border-gray-200 bg-gray-50/50 flex justify-between items-center">
-          <h2 className="text-sm font-black uppercase tracking-widest text-slate-900">Recent AI Drafts</h2>
-        </div>
-        
-        {pendingArticles.length === 0 ? (
-          <div className="p-12 text-center text-gray-500 flex flex-col items-center">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-              <Clock className="w-6 h-6 text-gray-400" />
-            </div>
-            <p className="font-bold text-gray-600">No pending drafts found</p>
-            <p className="text-sm mt-1">The AI hasn't generated any new articles yet. Wait for the next scheduled run.</p>
-          </div>
-        ) : (
-          <div className="divide-y divide-gray-100">
-            {pendingArticles.map((article) => (
-              <div key={article.id} className="p-6 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                <div>
-                  <span className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-1 block">
-                    {article.categories?.name_en || 'Uncategorized'}
-                  </span>
-                  <h3 className="text-lg font-bold text-slate-900">{article.title_en}</h3>
-                  <p className="text-sm text-gray-500 mt-1 line-clamp-1">{article.body_en.substring(0, 100)}...</p>
-                </div>
-                <button className="bg-white border border-gray-300 hover:border-gray-400 text-gray-700 font-bold text-xs uppercase tracking-widest px-4 py-2 rounded shadow-sm">
-                  Review
-                </button>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {stats.map((stat) => (
+          <div key={stat.name} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500">{stat.name}</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">{stat.value}</p>
               </div>
-            ))}
+              <div className={`${stat.bg} ${stat.color} p-3 rounded-xl`}>
+                <stat.icon className="w-6 h-6" />
+              </div>
+            </div>
+            <div className="mt-4 flex items-center text-sm text-green-600">
+              <TrendingUp className="w-4 h-4 mr-1" />
+              <span>+0% this month</span>
+            </div>
           </div>
-        )}
+        ))}
+      </div>
+
+      {/* Recent Activity Mockup */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+            <h3 className="font-bold text-gray-900 flex items-center gap-2">
+              <Clock className="w-5 h-5 text-blue-600" />
+              System Status
+            </h3>
+          </div>
+          <div className="p-8 text-center text-gray-400">
+            <p>Database connected and healthy.</p>
+            <p className="text-xs mt-2">v1.0.0 Stable</p>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+          <h3 className="font-bold text-gray-900 mb-6">Quick Actions</h3>
+          <div className="space-y-3">
+            <a href="/dashboard/articles/new" className="block w-full text-center py-2.5 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors">
+              New Article
+            </a>
+            <a href="/dashboard/categories" className="block w-full text-center py-2.5 bg-gray-50 text-gray-700 rounded-xl font-medium hover:bg-gray-100 transition-colors border border-gray-200">
+              Manage Categories
+            </a>
+          </div>
+        </div>
       </div>
     </div>
   )
