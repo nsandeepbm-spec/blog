@@ -92,7 +92,7 @@ const Navbar = () => {
             <Link
               key={link.name}
               href={link.href}
-              className={`text-[10px] font-black tracking-[0.2em] transition-all hover:text-blue-600 pb-0.5 ${
+              className={`text-[12px] font-black tracking-[0.15em] transition-all hover:text-blue-600 pb-0.5 ${
                 pathname === link.href
                   ? "text-blue-600 border-b-2 border-blue-600"
                   : "text-black border-b-2 border-transparent"
@@ -106,7 +106,7 @@ const Navbar = () => {
         {/* Login */}
         <Link
           href="/login"
-          className="bg-[#2563eb] text-white text-[10px] font-black tracking-[0.15em] px-5 md:px-7 py-2.5 hover:bg-blue-700 transition-all uppercase"
+          className="bg-[#2563eb] text-white text-[12px] font-black tracking-[0.15em] px-5 md:px-7 py-2.5 hover:bg-blue-700 transition-all uppercase"
         >
           Login
         </Link>
