@@ -105,7 +105,12 @@ export default function CategoryClient({ initialCategories }: { initialCategorie
               required
               type="text" 
               value={formData.name} 
-              onChange={e => setFormData({...formData, name: e.target.value})}
+              onChange={e => {
+                const name = e.target.value;
+                // Auto-generate slug by converting to lowercase, replacing spaces with hyphens, and removing special chars
+                const slug = name.toLowerCase().trim().replace(/[\s_]+/g, '-').replace(/[^\w-]+/g, '');
+                setFormData({ ...formData, name, slug });
+              }}
               className="text-gray-700 w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
               placeholder="e.g. Electric Vehicles"
             />
