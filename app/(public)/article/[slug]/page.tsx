@@ -137,20 +137,20 @@ export default async function ArticleDetailPage({ params }: Props) {
             {/* Article Body */}
             <div
               className="
-                text-[18px] leading-[1.85] text-gray-800 font-serif
-                [&_h1]:font-sans [&_h1]:text-[36px] [&_h1]:font-black [&_h1]:text-gray-900 [&_h1]:mt-8 [&_h1]:mb-3 [&_h1]:leading-tight [&_h1]:tracking-tighter
-                [&_h2]:font-sans [&_h2]:text-[28px] [&_h2]:font-bold [&_h2]:text-gray-900 [&_h2]:mt-8 [&_h2]:mb-2 [&_h2]:tracking-tight
-                [&_h3]:font-sans [&_h3]:text-[22px] [&_h3]:font-bold [&_h3]:text-gray-800 [&_h3]:mt-6 [&_h3]:mb-2
-                [&_p]:mb-6 [&_p]:text-gray-700
-                [&>p:first-of-type]:first-letter:text-[84px] [&>p:first-of-type]:first-letter:font-black [&>p:first-of-type]:first-letter:float-left [&>p:first-of-type]:first-letter:mr-4 [&>p:first-of-type]:first-letter:mt-2 [&>p:first-of-type]:first-letter:leading-[0.8] [&>p:first-of-type]:first-letter:text-slate-900 [&>p:first-of-type]:first-letter:font-serif
-                [&_blockquote]:border-l-4 [&_blockquote]:border-blue-600 [&_blockquote]:pl-6 [&_blockquote]:italic [&_blockquote]:text-gray-600 [&_blockquote]:my-10 [&_blockquote]:text-[20px] [&_blockquote]:leading-relaxed
-                [&_ul]:list-none [&_ul]:pl-0 [&_ul]:mb-8 [&_ul]:text-gray-700 [&_ul]:space-y-3
-                [&_ul_li]:relative [&_ul_li]:pl-6 [&_ul_li::before]:content-[''] [&_ul_li::before]:absolute [&_ul_li::before]:left-0 [&_ul_li::before]:top-3 [&_ul_li::before]:w-2 [&_ul_li::before]:h-2 [&_ul_li::before]:bg-blue-600 [&_ul_li::before]:rounded-sm
-                [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-8 [&_ol]:text-gray-700 [&_ol]:space-y-3
-                [&_li]:text-[18px]
-                [&_a]:text-blue-600 [&_a]:underline [&_a]:underline-offset-4 [&_a]:decoration-blue-600/30 hover:[&_a]:decoration-blue-600 transition-all
-                [&_hr]:border-gray-200 [&_hr]:my-12
-                [&_strong]:font-bold [&_strong]:text-gray-900
+                text-[19px] leading-[1.8] text-gray-800 font-lora
+                [&_h1]:font-sans [&_h1]:text-[36px] [&_h1]:font-black [&_h1]:text-black [&_h1]:mt-10 [&_h1]:mb-4 [&_h1]:leading-[1.2] [&_h1]:tracking-tight
+                [&_h2]:font-sans [&_h2]:text-[28px] [&_h2]:font-bold [&_h2]:text-black [&_h2]:mt-10 [&_h2]:mb-3 [&_h2]:tracking-tight
+                [&_h3]:font-sans [&_h3]:text-[22px] [&_h3]:font-bold [&_h3]:text-gray-900 [&_h3]:mt-8 [&_h3]:mb-3
+                [&_p]:mb-7
+                [&>p:first-of-type]:first-letter:text-[96px] [&>p:first-of-type]:first-letter:font-black [&>p:first-of-type]:first-letter:float-left [&>p:first-of-type]:first-letter:mr-4 [&>p:first-of-type]:first-letter:mt-2 [&>p:first-of-type]:first-letter:leading-[0.75] [&>p:first-of-type]:first-letter:text-blue-900 [&>p:first-of-type]:first-letter:font-lora
+                [&_blockquote]:border-l-4 [&_blockquote]:border-blue-600 [&_blockquote]:bg-blue-50/50 [&_blockquote]:py-4 [&_blockquote]:pr-4 [&_blockquote]:pl-6 [&_blockquote]:italic [&_blockquote]:text-gray-700 [&_blockquote]:my-10 [&_blockquote]:text-[21px] [&_blockquote]:leading-relaxed
+                [&_ul]:list-none [&_ul]:pl-0 [&_ul]:mb-8 [&_ul]:space-y-4
+                [&_ul_li]:relative [&_ul_li]:pl-6 [&_ul_li::before]:content-[''] [&_ul_li::before]:absolute [&_ul_li::before]:left-0 [&_ul_li::before]:top-3.5 [&_ul_li::before]:w-2 [&_ul_li::before]:h-2 [&_ul_li::before]:bg-blue-600 [&_ul_li::before]:rounded-sm
+                [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-8 [&_ol]:space-y-4
+                [&_li]:text-[19px] [&_li]:leading-[1.8] [&_li]:text-gray-800
+                [&_a]:text-blue-700 [&_a]:font-medium [&_a]:underline [&_a]:underline-offset-[5px] [&_a]:decoration-blue-700/30 hover:[&_a]:decoration-blue-700 hover:[&_a]:bg-blue-50 transition-all
+                [&_hr]:border-gray-200 [&_hr]:my-14
+                [&_strong]:font-bold [&_strong]:text-black
                 [&_em]:italic
               "
               dangerouslySetInnerHTML={{ __html: article.body || '' }}
