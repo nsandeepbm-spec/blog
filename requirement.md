@@ -149,8 +149,33 @@ This guarantees SEO (crawlers see both/all text in the DOM or based on specific 
   2. Technical Hindi Translation.
 - Wire API to save to database as `PENDING_REVIEW` with `is_ai_generated = true`.
 
-### Phase 4: Frontend Delivery & Optimization
+<!-- ### Phase 4: Frontend Delivery & Optimization
 - Wire the existing frontend UI components to the Supabase data fetching logic.
 - Implement ISR caching.
 - Build the Language Toggle client components.
-- Deploy to Google Cloud Run.
+- Deploy to Google Cloud Run. -->
+
+---
+
+## 4. Detailed AI Content Generation Plan (Phase 3 Extension)
+This section outlines the specific, category-separated automated AI content generation workflow.
+
+### 4.1 Category-Specific Prompts
+To ensure high-quality, targeted content, the backend automation will use separate, tailored prompts for each category.
+- Custom prompts per category (e.g., Automobile, Technology, Sports,Government, Health, Stock Market, etc.) will allow for easier, granular optimization of AI outputs.
+- Prompts are designed to command the Gemini API to generate or find highly relevant news and structure it exactly according to the database schema.
+
+### 4.2 Backend Automation Workflow (`/api/generate`)
+1. **Trigger**: An automated scheduler (e.g., Google Cloud Scheduler) triggers the `/api/generate` endpoint.
+2. **Category Routing**: The system iterates through categories, pulling the specific prompt for each category.
+3. **Prompt Execution**: Passes the category-specific prompt to the Gemini API.
+4. **Structured Output**: Gemini returns the content structured as required by the database (title, body, slug).
+5. **Database Storage**: The backend inserts the data directly into the `articles` table with `status: 'PENDING_REVIEW'` and `is_ai_generated: true`, linked to the correct `category_id`.
+
+### 4.3 Admin Dashboard AI Review
+- **Categorized Queue**: Within the Admin Dashboard, the "AI Generated Content" queue fetches pending articles and groups them by category for structured review.
+- **Preview & Analyze**: Admins can open any AI-generated draft to preview both the English content and Hindi translation.
+- **Approve to Publish**: Once reviewed and approved by the Admin, the article status updates to `PUBLISHED` and it immediately becomes live on the frontend via ISR.
+
+### 4.4 Preserving the Manual Flow
+- **Standard Authoring Intact**: The traditional manual content authoring flow (clicking "Create New Article", using the WYSIWYG editor, uploading images) remains completely untouched and functions alongside the automated AI pipeline.
